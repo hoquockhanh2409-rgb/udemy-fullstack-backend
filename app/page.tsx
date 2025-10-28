@@ -1,65 +1,181 @@
-import Image from "next/image";
+'use client';
+
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { getCurrentUser } from '@/lib/auth';
+import { User } from '@/types';
 
 export default function Home() {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const currentUser = getCurrentUser();
+    setUser(currentUser);
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 text-white py-20">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            🧸 Quản lý & Chia sẻ Đồ Chơi Trẻ Em
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xl md:text-2xl mb-8 opacity-90">
+            Nền tảng giúp bạn quản lý và chia sẻ đồ chơi với cộng đồng
           </p>
+          {!user && (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/login"
+                className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl"
+              >
+                Đăng nhập
+              </Link>
+              <Link
+                href="/register"
+                className="bg-purple-800 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-purple-900 transition-all shadow-lg hover:shadow-xl"
+              >
+                Đăng ký ngay
+              </Link>
+            </div>
+          )}
+          {user && (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              {user.role === 'customer' && (
+                <>
+                  <Link
+                    href="/my-toys"
+                    className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl"
+                  >
+                    Đồ chơi của tôi
+                  </Link>
+                  <Link
+                    href="/browse"
+                    className="bg-purple-800 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-purple-900 transition-all shadow-lg hover:shadow-xl"
+                  >
+                    Tìm đồ chơi
+                  </Link>
+                </>
+              )}
+              {user.role === 'admin' && (
+                <Link
+                  href="/admin/dashboard"
+                  className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl"
+                >
+                  👑 Vào Admin Dashboard
+                </Link>
+              )}
+              {user.role === 'employee' && (
+                <Link
+                  href="/employee/dashboard"
+                  className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl"
+                >
+                  👔 Vào Employee Dashboard
+                </Link>
+              )}
+            </div>
+          )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">
+            Tính năng nổi bật
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
+              <div className="text-5xl mb-4">📝</div>
+              <h3 className="text-2xl font-bold mb-4 text-gray-800">Quản lý dễ dàng</h3>
+              <p className="text-gray-600">
+                Thêm, sửa, xóa đồ chơi của bạn một cách đơn giản. Theo dõi tình trạng và thông tin chi tiết.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
+              <div className="text-5xl mb-4">🤝</div>
+              <h3 className="text-2xl font-bold mb-4 text-gray-800">Chia sẻ cộng đồng</h3>
+              <p className="text-gray-600">
+                Cho người khác mượn đồ chơi không còn sử dụng. Tạo giá trị và kết nối cộng đồng.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-50 to-teal-50 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
+              <div className="text-5xl mb-4">🔄</div>
+              <h3 className="text-2xl font-bold mb-4 text-gray-800">Theo dõi mượn trả</h3>
+              <p className="text-gray-600">
+                Quản lý yêu cầu mượn, theo dõi ngày trả và trạng thái của từng giao dịch.
+              </p>
+            </div>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">
+            Cách sử dụng
+          </h2>
+          <div className="max-w-4xl mx-auto space-y-8">
+            <div className="flex items-start gap-6">
+              <div className="bg-purple-600 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0">
+                1
+              </div>
+              <div>
+                <h3 className="text-xl font-bold mb-2 text-gray-800">Thêm đồ chơi của bạn</h3>
+                <p className="text-gray-600">
+                  Vào mục &quot;Đồ chơi của tôi&quot; và thêm thông tin về những đồ chơi bạn muốn chia sẻ.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-6">
+              <div className="bg-pink-600 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0">
+                2
+              </div>
+              <div>
+                <h3 className="text-xl font-bold mb-2 text-gray-800">Tìm kiếm đồ chơi</h3>
+                <p className="text-gray-600">
+                  Duyệt qua danh sách đồ chơi có sẵn từ người dùng khác và chọn những món bạn thích.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-6">
+              <div className="bg-red-600 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0">
+                3
+              </div>
+              <div>
+                <h3 className="text-xl font-bold mb-2 text-gray-800">Mượn và quản lý</h3>
+                <p className="text-gray-600">
+                  Gửi yêu cầu mượn, theo dõi trạng thái và trả đồ chơi đúng hạn.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      {!user && (
+        <section className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-16">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-4xl font-bold mb-6">Bắt đầu ngay hôm nay!</h2>
+            <p className="text-xl mb-8 opacity-90">
+              Tham gia cộng đồng chia sẻ đồ chơi và tạo giá trị cho những món đồ của bạn
+            </p>
+            <Link
+              href="/login"
+              className="inline-block bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl"
+            >
+              Đăng nhập ngay
+            </Link>
+          </div>
+        </section>
+      )}
+    </main>
   );
 }

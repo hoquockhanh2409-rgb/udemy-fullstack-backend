@@ -1,36 +1,183 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧸 Quản lý & Chia sẻ Đồ Chơi Trẻ Em
 
-## Getting Started
+Website giúp người dùng quản lý và chia sẻ đồ chơi trẻ em với cộng đồng.
 
-First, run the development server:
+## 🎯 Tính năng
 
+### 🔐 **Authentication & Authorization**
+- ✅ **Đăng nhập/Đăng ký**: Hệ thống xác thực người dùng
+- ✅ **3 vai trò người dùng**:
+  - 👑 **Admin**: Quản lý toàn bộ hệ thống
+  - 👔 **Employee**: Quản lý đồ chơi và xử lý yêu cầu mượn
+  - 👤 **Customer**: Mượn và chia sẻ đồ chơi
+
+### 👑 **Admin Dashboard**
+- 📊 Xem tổng quan hệ thống (users, toys, borrows)
+- 👥 Quản lý người dùng (xem danh sách, phân quyền)
+- 🧸 Quản lý tất cả đồ chơi
+- 📦 Theo dõi tất cả giao dịch mượn trả
+
+### 👔 **Employee Dashboard**
+- 📊 Xem thống kê đồ chơi và giao dịch
+- 🧸 Quản lý kho đồ chơi
+- ✅ Duyệt/Từ chối yêu cầu mượn
+- 📦 Xác nhận trả đồ chơi
+
+### 👤 **Customer Features**
+- ✅ **Quản lý đồ chơi của tôi**:
+  - Thêm đồ chơi mới với thông tin chi tiết
+  - Chỉnh sửa thông tin đồ chơi
+  - Xóa đồ chơi khỏi danh sách
+  - Theo dõi trạng thái (có sẵn/đang cho mượn)
+
+- ✅ **Tìm & Mượn đồ chơi**:
+  - Duyệt đồ chơi có sẵn từ người dùng khác
+  - Tìm kiếm theo tên/mô tả
+  - Lọc theo danh mục
+  - Gửi yêu cầu mượn với ngày trả dự kiến
+
+- ✅ **Quản lý mượn trả**:
+  - Xem đồ đang mượn
+  - Đánh dấu đã trả đồ chơi
+  - Xem yêu cầu mượn đồ của bạn
+  - Chấp nhận/Từ chối yêu cầu
+
+## 🛠️ Công nghệ sử dụng
+
+- **Framework**: Next.js 16 (App Router)
+- **UI Library**: React 19
+- **Styling**: Tailwind CSS
+- **Language**: TypeScript
+- **Package Manager**: npm
+
+## 🚀 Cài đặt và Chạy
+
+### Yêu cầu
+- Node.js 18+ 
+- npm hoặc yarn
+
+### Các bước cài đặt
+
+1. **Cài đặt dependencies** (nếu chưa cài):
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Chạy development server**:
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Mở trình duyệt**:
+Truy cập [http://localhost:3000](http://localhost:3000)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 👥 Tài khoản Demo
 
-## Learn More
+### 👑 Admin
+- **Email**: admin@toymanagement.com
+- **Password**: admin123
+- **Quyền**: Quản lý toàn bộ hệ thống
 
-To learn more about Next.js, take a look at the following resources:
+### 👔 Employee
+- **Email**: employee@toymanagement.com
+- **Password**: employee123
+- **Quyền**: Quản lý đồ chơi và giao dịch
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 👤 Customer
+- **Email**: user1@example.com
+- **Password**: user123
+- **Quyền**: Mượn và chia sẻ đồ chơi
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📁 Cấu trúc dự án
 
-## Deploy on Vercel
+```
+toy-management/
+├── app/
+│   ├── page.tsx                    # Trang chủ
+│   ├── login/page.tsx              # Đăng nhập
+│   ├── register/page.tsx           # Đăng ký
+│   ├── admin/dashboard/page.tsx    # Admin dashboard
+│   ├── employee/dashboard/page.tsx # Employee dashboard
+│   ├── my-toys/page.tsx           # Đồ chơi của tôi (Customer)
+│   ├── browse/page.tsx            # Tìm đồ chơi (Customer)
+│   ├── borrows/page.tsx           # Quản lý mượn (Customer)
+│   └── layout.tsx                 # Root layout
+├── components/
+│   ├── Navbar.tsx                 # Navigation với auth
+│   ├── ToyCard.tsx
+│   ├── ToyFormModal.tsx
+│   └── BorrowModal.tsx
+├── lib/
+│   ├── auth.ts                    # Authentication logic
+│   └── store.ts                   # Data management
+└── types/
+    └── index.ts                   # TypeScript interfaces
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🎨 Flow người dùng
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Customer Flow:
+1. Đăng ký/Đăng nhập
+2. Thêm đồ chơi của mình
+3. Tìm đồ chơi muốn mượn
+4. Gửi yêu cầu mượn
+5. Chờ chủ sở hữu chấp nhận
+6. Trả đồ chơi sau khi sử dụng
+
+### Owner (Customer có đồ cho mượn):
+1. Nhận yêu cầu mượn
+2. Chấp nhận/Từ chối yêu cầu
+3. Theo dõi đồ đang cho mượn
+4. Xác nhận khi được trả lại
+
+### Employee Flow:
+1. Đăng nhập với tài khoản employee
+2. Xem tổng quan hệ thống
+3. Duyệt yêu cầu mượn
+4. Xác nhận trả đồ chơi
+5. Quản lý kho đồ chơi
+
+### Admin Flow:
+1. Đăng nhập với tài khoản admin
+2. Xem dashboard tổng quan
+3. Quản lý người dùng
+4. Theo dõi tất cả đồ chơi
+5. Giám sát giao dịch
+
+## 💾 Quản lý dữ liệu
+
+Hiện tại dự án sử dụng **mock data** trong memory (`lib/auth.ts` và `lib/store.ts`). 
+
+Để triển khai thực tế, có thể tích hợp:
+- Database: PostgreSQL/MongoDB/Supabase/Firebase
+- Authentication: NextAuth.js/Clerk/Auth0
+- Image Upload: Cloudinary/AWS S3/Vercel Blob
+
+## 🔐 Security Notes
+
+**⚠️ Lưu ý**: Đây là demo project với mock authentication. Trong production:
+- Sử dụng thư viện authentication chuyên nghiệp
+- Hash passwords (bcrypt, argon2)
+- Sử dụng JWT tokens hoặc sessions
+- Implement HTTPS
+- Add CSRF protection
+- Rate limiting cho login attempts
+
+## 🎯 Tính năng có thể mở rộng
+
+- [ ] Real database integration
+- [ ] Email notifications
+- [ ] Upload hình ảnh thực tế
+- [ ] Chat giữa người dùng
+- [ ] Đánh giá và review
+- [ ] Maps tìm đồ chơi gần bạn
+- [ ] Payment integration
+- [ ] Analytics dashboard
+
+## 📱 Responsive Design
+
+Website responsive hoạt động tốt trên Mobile, Tablet, Desktop.
+
+---
+
+Made with ❤️ using Next.js, React, and Tailwind CSS
