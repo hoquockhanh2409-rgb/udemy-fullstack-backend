@@ -61,6 +61,19 @@ const defaultUsers: User[] = [
 // Helper functions for localStorage
 const isBrowser = typeof window !== 'undefined';
 
+// Validation helpers
+const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+const isValidPassword = (pwd: string) => {
+    return typeof pwd === 'string' && pwd.length >= 6;
+};
+
+/*
+Phiên bản này giữ nguyên behavior ban đầu để phục vụ lab.
+*/
+
 const loadUsers = (): User[] => {
     if (!isBrowser) return defaultUsers;
 
@@ -88,6 +101,19 @@ const saveUsers = (users: User[]): void => {
 
     try {
         localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+
+        // Persist users to server-side database.json (fire-and-forget)
+        ;(async () => {
+            try {
+                await fetch('/api/db', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ section: 'users', data: users })
+                })
+            } catch (err) {
+                console.error('Failed to persist users to server:', err)
+            }
+        })()
     } catch (error) {
         console.error('Error saving users:', error);
     }
@@ -134,7 +160,11 @@ let authState: AuthState = loadAuthState();
 // Auth operations
 export const login = (email: string, password: string): User | null => {
     users = loadUsers(); // Reload users to get latest
-    const user = users.find(u => u.email === email && u.password === password);
+    const cleanEmail = email.trim().toLowerCase();
+    // basic validation
+    if (!isValidEmail(cleanEmail) || !password) return null;
+
+    const user = users.find(u => u.email.toLowerCase() === cleanEmail && u.password === password);
     if (user) {
         authState = {
             user: user,
@@ -149,13 +179,24 @@ export const login = (email: string, password: string): User | null => {
 export const register = (userData: Omit<User, 'id' | 'createdAt'>): User => {
     users = loadUsers(); // Reload users
 
-    // Check if email already exists
-    if (users.find(u => u.email === userData.email)) {
+    const name = (userData.name || '').trim();
+    const email = (userData.email || '').trim().toLowerCase();
+    const password = userData.password || '';
+
+    // Basic validations
+    if (!name) throw new Error('Tên là bắt buộc!');
+    if (!isValidEmail(email)) throw new Error('Email không hợp lệ!');
+    if (!isValidPassword(password)) throw new Error('Mật khẩu phải có ít nhất 6 ký tự!');
+
+    // Check if email already exists (case-insensitive)
+    if (users.find(u => u.email.toLowerCase() === email)) {
         throw new Error('Email đã được sử dụng!');
     }
 
     const newUser: User = {
         ...userData,
+        name,
+        email,
         id: `user-${Date.now()}`,
         role: 'customer', // Default role
         createdAt: new Date()

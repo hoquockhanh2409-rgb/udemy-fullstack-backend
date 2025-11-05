@@ -33,6 +33,18 @@ const saveToys = (toys: Toy[]): void => {
     if (!isBrowser) return;
     try {
         localStorage.setItem(TOYS_STORAGE_KEY, JSON.stringify(toys));
+        // Persist toys to server-side database.json (fire-and-forget)
+        ;(async () => {
+            try {
+                await fetch('/api/db', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ section: 'toys', data: toys })
+                })
+            } catch (err) {
+                console.error('Failed to persist toys to server:', err)
+            }
+        })()
     } catch (error) {
         console.error('Error saving toys:', error);
     }
@@ -64,6 +76,18 @@ const saveBorrowRecords = (borrows: BorrowRecord[]): void => {
     if (!isBrowser) return;
     try {
         localStorage.setItem(BORROWS_STORAGE_KEY, JSON.stringify(borrows));
+        // Persist borrows to server-side database.json (fire-and-forget)
+        ;(async () => {
+            try {
+                await fetch('/api/db', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ section: 'borrows', data: borrows })
+                })
+            } catch (err) {
+                console.error('Failed to persist borrows to server:', err)
+            }
+        })()
     } catch (error) {
         console.error('Error saving borrows:', error);
     }
@@ -161,6 +185,19 @@ export const getToyById = (id: string): Toy | undefined => {
 
 export const createToy = (toyData: Omit<Toy, 'id' | 'createdAt' | 'updatedAt'>): Toy => {
     toys = loadToys();
+
+    // Basic validations (library-level) to prevent invalid data when client-side is bypassed
+    if (!toyData.name || !toyData.name.trim()) throw new Error('Tên đồ chơi là bắt buộc');
+    if (!toyData.description || !toyData.description.trim()) throw new Error('Mô tả là bắt buộc');
+    if (!toyData.category || !toyData.category.trim()) throw new Error('Danh mục là bắt buộc');
+    if (!toyData.ageRange || !toyData.ageRange.trim()) throw new Error('Độ tuổi phù hợp là bắt buộc');
+    try {
+        // validate image URL format
+        new URL(toyData.imageUrl);
+    } catch (err) {
+        throw new Error('URL hình ảnh không hợp lệ');
+    }
+
     const newToy: Toy = {
         ...toyData,
         id: `toy-${Date.now()}`,
@@ -214,6 +251,16 @@ export const getBorrowsForMyToys = (userId: string): BorrowRecord[] => {
 
 export const createBorrowRequest = (borrowData: Omit<BorrowRecord, 'id' | 'status'>): BorrowRecord => {
     borrowRecords = loadBorrowRecords();
+    // Validate borrow request at library level
+    const toy = getToyById(borrowData.toyId);
+    if (!toy) throw new Error('Đồ chơi không tồn tại');
+    if (!toy.available) throw new Error('Đồ chơi hiện không khả dụng');
+    if (borrowData.borrowerId === toy.ownerId) throw new Error('Người mượn không thể là chủ sở hữu');
+    const borrowDate = new Date(borrowData.borrowDate);
+    const expected = new Date(borrowData.expectedReturnDate);
+    if (isNaN(borrowDate.getTime()) || isNaN(expected.getTime())) throw new Error('Ngày mượn hoặc ngày trả không hợp lệ');
+    if (expected <= borrowDate) throw new Error('Ngày dự kiến trả phải sau ngày mượn');
+
     const newBorrow: BorrowRecord = {
         ...borrowData,
         id: `borrow-${Date.now()}`,
@@ -223,10 +270,7 @@ export const createBorrowRequest = (borrowData: Omit<BorrowRecord, 'id' | 'statu
     saveBorrowRecords(borrowRecords);
 
     // Update toy availability
-    const toy = getToyById(borrowData.toyId);
-    if (toy) {
-        updateToy(toy.id, { available: false });
-    }
+    updateToy(toy.id, { available: false });
 
     return newBorrow;
 };
