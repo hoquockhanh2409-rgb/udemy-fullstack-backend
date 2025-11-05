@@ -20,6 +20,7 @@ export default function ToyFormModal({ isOpen, onClose, onSave, toy }: ToyFormMo
         ownerName: '',
         available: true
     });
+    const [uploading, setUploading] = useState(false)
 
     useEffect(() => {
         if (toy) {
@@ -39,9 +40,46 @@ export default function ToyFormModal({ isOpen, onClose, onSave, toy }: ToyFormMo
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        // Basic client-side validation
+        if (!formData.name.trim()) {
+            alert('Tên đồ chơi là bắt buộc!');
+            return;
+        }
+        if (!formData.description.trim()) {
+            alert('Mô tả là bắt buộc!');
+            return;
+        }
+        if (!formData.category) {
+            alert('Danh mục là bắt buộc!');
+            return;
+        }
+        if (!formData.ageRange.trim()) {
+            alert('Độ tuổi phù hợp là bắt buộc!');
+            return;
+        }
+        // Validate image URL
+        try {
+            // new URL will throw if invalid
+            // allow empty? field is required in markup, so validate
+            new URL(formData.imageUrl);
+        } catch (err) {
+            alert('URL hình ảnh không hợp lệ! Vui lòng nhập URL hợp lệ.');
+            return;
+        }
+
         onSave(formData);
         onClose();
     };
+
+    /*
+     GHI CHÚ (Tiếng Việt):
+     - Đã thêm validate phía client để xử lý các trường bắt buộc và format URL ảnh.
+     - Những validate này nhằm khắc phục các bug sau:
+         + BUG-002: ngăn dữ liệu không hợp lệ được gửi xuống store khi client bypass.
+         + BUG-005: đảm bảo input rõ ràng (cũng đã thêm lớp text-gray-900 trước đó).
+         + BUG-008: kiểm tra format URL ảnh trước khi lưu.
+     - Lưu ý: vẫn nên có validate ở layer thư viện/server (đã thêm trong `lib/store.ts`).
+    */
 
     if (!isOpen) return null;
 
@@ -137,19 +175,57 @@ export default function ToyFormModal({ isOpen, onClose, onSave, toy }: ToyFormMo
                         </select>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            URL hình ảnh *
-                        </label>
-                        <input
-                            type="url"
-                            required
-                            value={formData.imageUrl}
-                            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
-                            placeholder="https://example.com/image.jpg"
-                        />
-                    </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Hình ảnh *
+                            </label>
+
+                            <div className="flex items-center gap-4">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0]
+                                        if (!file) return
+                                        setUploading(true)
+                                        try {
+                                            const fd = new FormData()
+                                            fd.append('file', file)
+                                            const res = await fetch('/api/upload', {
+                                                method: 'POST',
+                                                body: fd
+                                            })
+                                            const data = await res.json()
+                                            if (data?.url) {
+                                                setFormData({ ...formData, imageUrl: data.url })
+                                            } else {
+                                                alert('Upload không thành công')
+                                            }
+                                        } catch (err) {
+                                            console.error(err)
+                                            alert('Có lỗi khi upload ảnh')
+                                        } finally {
+                                            setUploading(false)
+                                        }
+                                    }}
+                                    className="text-sm"
+                                />
+
+                                <input
+                                    type="url"
+                                    required
+                                    value={formData.imageUrl}
+                                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
+                                    placeholder="Hoặc dán URL hình ảnh"
+                                />
+                            </div>
+
+                            {uploading && <p className="text-sm text-gray-500 mt-2">Đang upload...</p>}
+                            {formData.imageUrl && (
+                                <img src={formData.imageUrl} alt="preview" className="mt-3 max-h-40 rounded" />
+                            )}
+                        </div>
 
                     <div className="flex gap-3 pt-4">
                         <button
