@@ -57,13 +57,9 @@ export default function ToyFormModal({ isOpen, onClose, onSave, toy }: ToyFormMo
             alert('Độ tuổi phù hợp là bắt buộc!');
             return;
         }
-        // Validate image URL
-        try {
-            // new URL will throw if invalid
-            // allow empty? field is required in markup, so validate
-            new URL(formData.imageUrl);
-        } catch (err) {
-            alert('URL hình ảnh không hợp lệ! Vui lòng nhập URL hợp lệ.');
+        // Require an uploaded image URL (we only accept uploaded files)
+        if (!formData.imageUrl || !formData.imageUrl.trim()) {
+            alert('Vui lòng upload một hình ảnh (từ máy của bạn).');
             return;
         }
 
@@ -197,7 +193,11 @@ export default function ToyFormModal({ isOpen, onClose, onSave, toy }: ToyFormMo
                                             })
                                             const data = await res.json()
                                             if (data?.url) {
-                                                setFormData({ ...formData, imageUrl: data.url })
+                                                // Convert to absolute URL for preview/use
+                                                const urlToSet = data.url.startsWith('/') && typeof window !== 'undefined'
+                                                    ? `${window.location.origin}${data.url}`
+                                                    : data.url
+                                                setFormData((prev) => ({ ...prev, imageUrl: urlToSet }))
                                             } else {
                                                 alert('Upload không thành công')
                                             }
@@ -209,15 +209,6 @@ export default function ToyFormModal({ isOpen, onClose, onSave, toy }: ToyFormMo
                                         }
                                     }}
                                     className="text-sm"
-                                />
-
-                                <input
-                                    type="url"
-                                    required
-                                    value={formData.imageUrl}
-                                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
-                                    placeholder="Hoặc dán URL hình ảnh"
                                 />
                             </div>
 
